@@ -10,9 +10,19 @@ create({
   qrTimeout: 0, // Espera infinita por el QR
   authTimeout: 60,
   multiDevice: true,
-  useChrome: true,
-  popup: true,
-  qrPopUpOnly: true
+  qrPopUpOnly: true,
+  puppeteerOptions: {
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
+  }
 }).then((client: Client) => start(client));
 
 function start(client: Client) {
