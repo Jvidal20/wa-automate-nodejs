@@ -182,7 +182,7 @@
     "winston-daily-rotate-file": "^4.5.5",
     "winston-syslog": "^2.5.0",
     "xmlbuilder2": "^3.0.2",
-    "@open-wa/wa-automate": "^4.76.0",
+    "@open-wa/wa-automate": "^4.76.0"
   },
   "overrides": {
     "uuid": "^9.0.0"
