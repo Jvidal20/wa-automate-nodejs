@@ -1,14 +1,12 @@
 import express from 'express';
 import { create, Client } from '@open-wa/wa-automate';
-import puppeteer from 'puppeteer'; // 👈 Importar puppeteer completo
+import puppeteer from 'puppeteer'; // 👈 puppeteer completo
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 (async () => {
-  const browserFetcher = puppeteer.createBrowserFetcher();
-  const localRevisions = await browserFetcher.localRevisions();
-  const revisionInfo = await browserFetcher.revisionInfo(localRevisions[0]);
+  const browserPath = puppeteer.executablePath(); // ✅ este sí compila
 
   create({
     sessionId: 'wa-bridge-session',
@@ -18,7 +16,7 @@ const PORT = process.env.PORT || 10000;
     multiDevice: true,
     qrPopUpOnly: true,
     puppeteerOptions: {
-      executablePath: revisionInfo.executablePath, // 👈 Usamos Chrome descargado por puppeteer
+      executablePath: browserPath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
