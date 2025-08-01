@@ -1,5 +1,6 @@
 import express from 'express';
 import { create, Client } from '@open-wa/wa-automate';
+import puppeteer from 'puppeteer';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -12,6 +13,7 @@ create({
   multiDevice: true,
   qrPopUpOnly: true,
   puppeteerOptions: {
+    executablePath: puppeteer.executablePath(),
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
