@@ -29,7 +29,7 @@
     "build:config-for-bin": "cd build && ts-node build-config-json-for-bin.ts && ts-node generate-oas-types.ts && cd ..",
     "postinstall": "patch-package",
     "install": "cross-env npm_config_yes=true npx ignore-check@latest -p '**.data.json' -p '**.node-persist**' -p '**_IGNORE_**' --comment 'managed by open-wa'",
-    "start": "npm run build && node dist/index.js"
+    "start": "npm run build && node dist/server.js"
   },
   "husky": {
     "hooks": {
