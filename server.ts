@@ -1,31 +1,41 @@
 import express from 'express';
 import { create, Client } from '@open-wa/wa-automate';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer'; // 👈 Importar puppeteer completo
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-create({
-  sessionId: 'wa-bridge-session',
-  headless: true,
-  qrTimeout: 0, // Espera infinita por el QR
-  authTimeout: 60,
-  multiDevice: true,
-  qrPopUpOnly: true,
-  puppeteerOptions: {
-    executablePath: puppeteer.executablePath(),
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
-  }
-}).then((client: Client) => start(client));
+(async () => {
+  const browserFetcher = puppeteer.createBrowserFetcher();
+  const localRevisions = await browserFetcher.localRevisions();
+  const revisionInfo = await browserFetcher.revisionInfo(localRevisions[0]);
+
+  create({
+    sessionId: 'wa-bridge-session',
+    headless: true,
+    qrTimeout: 0,
+    authTimeout: 60,
+    multiDevice: true,
+    qrPopUpOnly: true,
+    puppeteerOptions: {
+      executablePath: revisionInfo.executablePath, // 👈 Usamos Chrome descargado por puppeteer
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ]
+    }
+  }).then((client: Client) => {
+    start(client);
+  }).catch(err => {
+    console.error('Error al iniciar el cliente de WhatsApp:', err);
+  });
+})();
 
 function start(client: Client) {
   client.onMessage(async message => {
