@@ -1,41 +1,36 @@
-import express from 'express';
-import { create, Client } from '@open-wa/wa-automate';
+import express from "express";
+import { create } from "@open-wa/wa-automate";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-create({
-  sessionId: 'wa-bridge-session',
-  headless: true,
-  qrTimeout: 0,
-  authTimeout: 60,
-  multiDevice: true,
-  qrPopUpOnly: true,
-  puppeteer: require('puppeteer'), // 👈 Usa puppeteer completo aquí
-  puppeteerOptions: {
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
+app.get("/", (_req, res) => {
+  res.send("✅ Servidor funcionando correctamente.");
+});
+
+(async () => {
+  try {
+    console.log("🟡 Inicializando sesión de WhatsApp...");
+    
+    const client = await create({
+      headless: true,
+      executablePath: "/usr/bin/google-chrome", // o el path válido si ya tienes puppeteer instalado
+    });
+
+    console.log("🟢 Cliente creado con éxito");
+
+    client.onMessage(async (message) => {
+      console.log("📩 Mensaje recibido:", message.body);
+      if (message.body === "ping") {
+        await client.sendText(message.from, "pong");
+      }
+    });
+
+  } catch (error) {
+    console.error("🔴 Error al iniciar cliente WA:", error);
   }
-}).then((client: Client) => start(client));
+})();
 
-function start(client: Client) {
-  client.onMessage(async message => {
-    if (message.body.toLowerCase() === 'hola') {
-      await client.sendText(message.from, '👋 ¡Hola! Soy tu asistente personal.');
-    }
-  });
-}
-
-app.get('/', (_req, res) => res.send('✅ WA Bridge conectado con WhatsApp'));
-
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
+app.listen(port, () => {
+  console.log(`✅ Servidor Express corriendo en puerto ${port}`);
 });
