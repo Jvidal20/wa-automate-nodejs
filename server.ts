@@ -13,8 +13,8 @@ app.get("/", (_req, res) => {
     console.log("🟡 Inicializando sesión de WhatsApp...");
     
     const client = await create({
-      headless: true,
-      executablePath: "/usr/bin/google-chrome", 
+        headless: true,
+        executablePath: "/usr/bin/google-chrome", 
     });
 
     console.log("🟢 Cliente creado con éxito");
