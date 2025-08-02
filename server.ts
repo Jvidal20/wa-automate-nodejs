@@ -14,7 +14,6 @@ app.get("/", (_req, res) => {
     
     const client = await create({
       headless: true,
-      executablePath: "/usr/bin/google-chrome", // o el path válido si ya tienes puppeteer instalado
     });
 
     console.log("🟢 Cliente creado con éxito");
