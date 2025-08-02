@@ -1,50 +1,31 @@
 import express from 'express';
-import { create, Client } from '@open-wa/wa-automate';
-import puppeteer from 'puppeteer'; // 👈 puppeteer completo
+import puppeteer from 'puppeteer';
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 
-(async () => {
-  const browserPath = puppeteer.executablePath(); // ✅ este sí compila
+app.get('/check', async (req, res) => {
+  try {
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
 
-  create({
-    sessionId: 'wa-bridge-session',
-    headless: true,
-    qrTimeout: 0,
-    authTimeout: 60,
-    multiDevice: true,
-    qrPopUpOnly: true,
-    puppeteerOptions: {
-      executablePath: browserPath,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ]
-    }
-  }).then((client: Client) => {
-    start(client);
-  }).catch(err => {
-    console.error('Error al iniciar el cliente de WhatsApp:', err);
-  });
-})();
+    const page = await browser.newPage();
+    await page.goto('https://example.com');
+    const title = await page.title();
 
-function start(client: Client) {
-  client.onMessage(async message => {
-    if (message.body.toLowerCase() === 'hola') {
-      await client.sendText(message.from, '👋 ¡Hola! Soy tu asistente personal.');
-    }
-  });
-}
+    await browser.close();
+    res.status(200).send(`Título de la página: ${title}`);
+  } catch (err) {
+    console.error('Error al lanzar puppeteer:', err);
+    res.status(500).send('Error al lanzar puppeteer');
+  }
+});
 
-app.get('/', (_req, res) => res.send('✅ WA Bridge está conectado con WhatsApp'));
+app.get('/', (_, res) => {
+  res.send('✅ Servidor funcionando correctamente.');
+});
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server escuchando en puerto ${PORT}`);
+app.listen(port, () => {
+  console.log(`🚀 Servidor escuchando en el puerto ${port}`);
 });
