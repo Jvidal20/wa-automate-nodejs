@@ -14,6 +14,7 @@ app.get("/", (_req, res) => {
     
     const client = await create({
       headless: true,
+      executablePath: "/usr/bin/google-chrome",
     });
 
     console.log("🟢 Cliente creado con éxito");
