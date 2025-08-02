@@ -1,31 +1,41 @@
 import express from 'express';
-import puppeteer from 'puppeteer';
+import { create, Client } from '@open-wa/wa-automate';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-app.get('/check', async (req, res) => {
-  try {
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
-    await page.goto('https://example.com');
-    const title = await page.title();
-
-    await browser.close();
-    res.status(200).send(`Título de la página: ${title}`);
-  } catch (err) {
-    console.error('Error al lanzar puppeteer:', err);
-    res.status(500).send('Error al lanzar puppeteer');
+create({
+  sessionId: 'wa-bridge-session',
+  headless: true,
+  qrTimeout: 0,
+  authTimeout: 60,
+  multiDevice: true,
+  qrPopUpOnly: true,
+  puppeteer: require('puppeteer'), // 👈 Usa puppeteer completo aquí
+  puppeteerOptions: {
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
   }
-});
+}).then((client: Client) => start(client));
 
-app.get('/', (_, res) => {
-  res.send('✅ Servidor funcionando correctamente.');
-});
+function start(client: Client) {
+  client.onMessage(async message => {
+    if (message.body.toLowerCase() === 'hola') {
+      await client.sendText(message.from, '👋 ¡Hola! Soy tu asistente personal.');
+    }
+  });
+}
 
-app.listen(port, () => {
-  console.log(`🚀 Servidor escuchando en el puerto ${port}`);
+app.get('/', (_req, res) => res.send('✅ WA Bridge conectado con WhatsApp'));
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
 });
